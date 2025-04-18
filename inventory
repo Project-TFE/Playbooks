@@ -1,0 +1,17 @@
+[jenkins]
+jenkins_server 
+ansible_host=<jenkins_ip> 
+ansible_user=azureuser 
+ 
+
+[sonarqube]
+sonar_server 
+ansible_host=<sonar_ip> 
+ansible_user=azureuser 
+ 
+
+[kubernetes]
+kube_server 
+ansible_host=<kube_ip> 
+ansible_user=azureuser 
+ 

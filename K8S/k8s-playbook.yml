@@ -1,0 +1,105 @@
+ ---
+- name: Install Kubernetes and Docker
+  hosts: cluster-k8s
+  become: yes
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install required packages
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+          - gnupg2
+        state: present
+
+    # Docker Installation
+    - name: Add Docker GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker repository
+      apt_repository:
+        repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable
+        state: present
+
+    - name: Install Docker
+      apt:
+        name: docker-ce
+        state: present
+
+    - name: Start Docker service
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    # Kubernetes Installation
+    - name: Add Kubernetes GPG key
+      apt_key:
+        url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+        state: present
+
+    - name: Add Kubernetes repository
+      apt_repository:
+        repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
+        state: present
+
+    - name: Install Kubernetes components
+      apt:
+        name:
+          - kubelet
+          - kubeadm
+          - kubectl
+        state: present
+
+    # Minikube Installation
+    - name: Download Minikube
+      get_url:
+        url: https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+        dest: /usr/local/bin/minikube
+        mode: '0755'
+
+    # Jenkins Installation
+    - name: Add Jenkins GPG key
+      apt_key:
+        url: https://pkg.jenkins.io/debian-stable/jenkins.io.key
+        state: present
+
+    - name: Add Jenkins repository
+      apt_repository:
+        repo: deb https://pkg.jenkins.io/debian-stable binary/
+        state: present
+
+    - name: Install Jenkins
+      apt:
+        name: jenkins
+        state: present
+
+    - name: Start Jenkins service
+      service:
+        name: jenkins
+        state: started
+        enabled: yes
+
+    # Post-installation setup
+    - name: Add current user to docker group
+      user:
+        name: "{{ ansible_user }}"
+        groups: docker
+        append: yes
+
+    - name: Create .kube directory
+      file:
+        path: /home/{{ ansible_user }}/.kube
+        state: directory
+        mode: '0755'
+
+To run the playbook:
+```bash
+ansible-playbook -i ansible/inventory.yml ansible/k8s-setup.yml
