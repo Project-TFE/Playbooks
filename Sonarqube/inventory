@@ -1,0 +1,4 @@
+[sonarqube]
+EhealthSonar ansible_host=10.0.5.4
+
+ 
